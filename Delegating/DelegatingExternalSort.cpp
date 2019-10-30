@@ -101,7 +101,7 @@ void mergeFiles(char *output_file, int n, int k)
 	FILE** in = new FILE*[k];
 	for (int i = 0; i < k; i++)
 	{
-		char fileName[2];
+		char fileName[3];
 
 		// convert i to string 
 		snprintf(fileName, sizeof(fileName), "%d", i);
@@ -157,8 +157,8 @@ void mergeFiles(char *output_file, int n, int k)
 }
 
 int processAmount = 4;
-int num_ways = 10;
-const int run_size = 1000;
+int num_ways = 100;
+const int run_size = 2500;
 
 //HANDLE hSemaphore;
 int next_output_file = 0;
@@ -202,7 +202,6 @@ int main()
 	srand(time(NULL));
 	for (int i = 0; i < num_ways * run_size; i++)
 		fprintf(in, "%d ", rand());
-
 	fclose(in);
 
 	LARGE_INTEGER liFrequency, liStartTime, liFinishTime;
@@ -216,7 +215,7 @@ int main()
 	in = openFile(input_file, (char*)"r");
 	//FILE**
 	out = new FILE*[num_ways];
-	char fileName[2];
+	char fileName[3];
 	for (int i = 0; i < num_ways; i++)
 	{
 		// convert i to string 
@@ -260,10 +259,7 @@ int main()
 	// close input and output files 
 	for (int i = 0; i < num_ways; i++)
 		fclose(out[i]);
-
 	fclose(in);
-
-	//mergeFiles(output_file, run_size, num_ways);
 
 	WaitForMultipleObjects(processAmount, hThread, TRUE, INFINITE);
 	for (int i = 0; i < processAmount; i++)
@@ -271,7 +267,7 @@ int main()
 
 	mergeFiles(output_file, run_size, num_ways);
 
-	printf("%d %d %d %d\n", num_ways, cnt, mod, next_output_file);
+	//printf("%d %d %d %d\n", num_ways, cnt, mod, next_output_file);
 
 	DeleteCriticalSection(&cs);
 

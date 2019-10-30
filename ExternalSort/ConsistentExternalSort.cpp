@@ -1,10 +1,12 @@
-// C++ program to implement external sorting using 
-// merge sort 
-//#include <bits/stdc++.h> 
 #define _CRT_SECURE_NO_WARNINGS
+#include <windows.h>
+#include <process.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <algorithm>
+#include <vector>
+#include <queue>
 #include <windows.h>
 #include <time.h>
 
@@ -53,8 +55,7 @@ public:
 	}
 };
 
-// Constructor: Builds a heap from a given array a[] 
-// of given size 
+// Constructor: Builds a heap from a given array a[] of given size 
 MinHeap::MinHeap(MinHeapNode a[], int size)
 {
 	heap_size = size;
@@ -67,9 +68,7 @@ MinHeap::MinHeap(MinHeapNode a[], int size)
 	}
 }
 
-// A recursive method to heapify a subtree with root 
-// at given index. This method assumes that the 
-// subtrees are already heapified 
+// A recursive method to heapify a subtree with root at given index. This method assumes that the subtrees are already heapified 
 void MinHeap::MinHeapify(int i)
 {
 	int l = left(i);
@@ -94,70 +93,6 @@ void swap(MinHeapNode* x, MinHeapNode* y)
 	*y = temp;
 }
 
-// Merges two subarrays of arr[]. 
-// First subarray is arr[l..m] 
-// Second subarray is arr[m+1..r] 
-void merge(int arr[], int l, int m, int r)
-{
-	int i, j, k;
-	int n1 = m - l + 1;
-	int n2 = r - m;
-
-	/* create temp arrays */
-	//int L[n1], R[n2];
-	int* L = new int[n1];
-	int* R = new int[n2];
-
-	/* Copy data to temp arrays L[] and R[] */
-	for (i = 0; i < n1; i++)
-		L[i] = arr[l + i];
-	for (j = 0; j < n2; j++)
-		R[j] = arr[m + 1 + j];
-
-	/* Merge the temp arrays back into arr[l..r]*/
-	i = 0; // Initial index of first subarray 
-	j = 0; // Initial index of second subarray 
-	k = l; // Initial index of merged subarray 
-	while (i < n1 && j < n2)
-	{
-		if (L[i] <= R[j])
-			arr[k++] = L[i++];
-		else
-			arr[k++] = R[j++];
-	}
-
-	/* Copy the remaining elements of L[], if there
-	are any */
-	while (i < n1)
-		arr[k++] = L[i++];
-
-	/* Copy the remaining elements of R[], if there
-	are any */
-	while (j < n2)
-		arr[k++] = R[j++];
-
-	delete[] L;
-	delete[] R;
-}
-
-/* l is for left index and r is right index of the
-sub-array of arr to be sorted */
-void mergeSort(int arr[], int l, int r)
-{
-	if (l < r)
-	{
-		// Same as (l+r)/2, but avoids overflow for 
-		// large l and h 
-		int m = l + (r - l) / 2;
-
-		// Sort first and second halves 
-		mergeSort(arr, l, m);
-		mergeSort(arr, m + 1, r);
-
-		merge(arr, l, m, r);
-	}
-}
-
 FILE* openFile(char* fileName, char* mode)
 {
 	FILE* fp = fopen(fileName, mode);
@@ -169,34 +104,38 @@ FILE* openFile(char* fileName, char* mode)
 	return fp;
 }
 
-// Merges k sorted files. Names of files are assumed 
-// to be 1, 2, 3, ... k 
+// Merges k sorted files. Names of files are assumed to be 0, 1, 2, ... k - 1 
 void mergeFiles(char *output_file, int n, int k)
 {
 	//FILE* in[k];
 	FILE** in = new FILE*[k];
+	//queue<FILE*> q;
 	for (int i = 0; i < k; i++)
 	{
-		char fileName[2];
+		char fileName[3];
 
 		// convert i to string 
 		snprintf(fileName, sizeof(fileName), "%d", i);
 
 		// Open output files in read mode. 
 		in[i] = openFile(fileName, (char* )"r");
+		//q.push(in[i]);
 	}
 
 	// FINAL OUTPUT FILE 
 	FILE *out = openFile(output_file, (char*)"w");
 
-	// Create a min heap with k heap nodes. Every heap node 
-	// has first element of scratch output file 
+	/*while (!q.empty())
+	{
+
+	}*/
+
+	// Create a min heap with k heap nodes. Every heap node has first element of scratch output file 
 	MinHeapNode* harr = new MinHeapNode[k];
 	int i;
 	for (i = 0; i < k; i++)
 	{
-		// break if no output file is empty and 
-		// index i will be no. of input files 
+		// break if no output file is empty and index i will be number of input files 
 		if (fscanf(in[i], "%d ", &harr[i].element) != 1)
 			break;
 
@@ -206,18 +145,15 @@ void mergeFiles(char *output_file, int n, int k)
 
 	int count = 0;
 
-	// Now one by one get the minimum element from min 
-	// heap and replace it with next element. 
-	// run till all filled input files reach EOF 
+	// Now one by one get the minimum element from min heap and replace it with next element. run till all filled input files reach EOF 
 	while (count != i)
 	{
 		// Get the minimum element and store it in output file 
 		MinHeapNode root = hp.getMin();
 		fprintf(out, "%d ", root.element);
 
-		// Find the next element that will replace current 
-		// root of heap. The next element belongs to same 
-		// input file as the current min element. 
+
+		// Find the next element that will replace current root of heap. The next element belongs to same input file as the current min element. 
 		if (fscanf(in[root.i], "%d ", &root.element) != 1)
 		{
 			root.element = INT_MAX;
@@ -235,8 +171,12 @@ void mergeFiles(char *output_file, int n, int k)
 	fclose(out);
 }
 
-// Using a merge-sort algorithm, create the initial runs 
-// and divide them evenly among the output files 
+
+int glob0 = 0;
+
+
+
+// Using a merge-sort algorithm, create the initial runs and divide them evenly among the output files 
 void createInitialRuns(char *input_file, int run_size,
 	int num_ways)
 {
@@ -246,7 +186,7 @@ void createInitialRuns(char *input_file, int run_size,
 	// output scratch files 
 	//FILE* out[num_ways];
 	FILE** out = new FILE*[num_ways];
-	char fileName[2];
+	char fileName[3];
 	for (int i = 0; i < num_ways; i++)
 	{
 		// convert i to string 
@@ -264,26 +204,35 @@ void createInitialRuns(char *input_file, int run_size,
 	int next_output_file = 0;
 
 	int i;
+	//int k = 0;
 	while (more_input)
 	{
+		//k++;
 		// write run_size elements into arr from input file 
 		for (i = 0; i < run_size; i++)
 		{
 			if (fscanf(in, "%d ", &arr[i]) != 1)
 			{
 				more_input = false;
+				//printf("%s %d %d\n", "error", i, k);
 				break;
 			}
 		}
 
-		// sort array using merge sort 
-		mergeSort(arr, 0, i - 1);
+		// sort array 
+		//mergeSort(arr, 0, i - 1);
+		vector<int> toSort;
+		toSort.assign(arr, arr + i);
+		sort(toSort.begin(), toSort.end());
 
 		// write the records to the appropriate scratch output file 
 		// can't assume that the loop runs to run_size 
 		// since the last run's length may be less than run_size 
-		for (int j = 0; j < i; j++)
-			fprintf(out[next_output_file], "%d ", arr[j]);
+		for (int j = 0; j < i; j++) {
+			//fprintf(out[next_output_file], "%d ", arr[j]);
+			fprintf(out[next_output_file], "%d ", toSort[j]);
+			if (toSort[j] == 0) glob0++;
+		}
 
 		next_output_file++;
 	}
@@ -291,7 +240,6 @@ void createInitialRuns(char *input_file, int run_size,
 	// close input and output files 
 	for (int i = 0; i < num_ways; i++)
 		fclose(out[i]);
-
 	fclose(in);
 }
 
@@ -311,28 +259,40 @@ void externalSort(char* input_file, char *output_file,
 // Driver program to test above 
 int main()
 {
-	// No. of Partitions of input file. 
-	int num_ways = 10;
 
+	// Number of partitions of input file. 
+	int num_ways = 100;
 	// The size of each partition 
-	int run_size = 1000;
+	int run_size = 2500;
 
 	char input_file[] = "input.txt";
 	char output_file[] = "output.txt";
-
 	FILE* in = openFile(input_file, (char*)"w");
 
 	srand(time(NULL));
-
 	// generate input 
+	int temp0 = 0;
 	for (int i = 0; i < num_ways * run_size; i++)
-		fprintf(in, "%d ", rand());
-
+	{
+		int temp = rand();
+		fprintf(in, "%d ", temp);
+		if (temp == 0) temp0++;
+	}
 	fclose(in);
 
-	externalSort(input_file, output_file, num_ways,
-		run_size);
+	LARGE_INTEGER liFrequency, liStartTime, liFinishTime;
+	QueryPerformanceFrequency(&liFrequency);
+	QueryPerformanceCounter(&liStartTime);
 
+	externalSort(input_file, output_file, num_ways, run_size);
+
+	printf("%d %d\n", temp0, glob0);
+
+	QueryPerformanceCounter(&liFinishTime);
+	double dElapsedTime = 1000.*(liFinishTime.QuadPart - liStartTime.QuadPart) / liFrequency.QuadPart;
+	printf("Elapsed time = %f\n", dElapsedTime);
+
+	getchar();
 	return 0;
 }
 
